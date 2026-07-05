@@ -29,7 +29,8 @@ public class TaskService : ITaskService
 
     public async Task<SyncResultDto> SyncAsync(IEnumerable<string> descripciones, CancellationToken cancellationToken = default)
     {
-        var incoming = descripciones
+        var rawList = descripciones.ToList();
+        var incoming = rawList
             .Where(d => !string.IsNullOrWhiteSpace(d))
             .Select(d => d.Trim())
             .ToList();
@@ -38,7 +39,7 @@ public class TaskService : ITaskService
         var existingSet = existing.Select(t => t.Descripcion).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var toAdd = incoming
-            .Where(d => existingSet.Add(d)) // Add returns false if already present -> dedups incoming too
+            .Where(d => existingSet.Add(d)) // HashSet.Add returns false when already present -> dedups incoming too
             .Select(d => new TaskItem { Descripcion = d, FechaCreacion = DateTime.UtcNow })
             .ToList();
 
@@ -46,7 +47,7 @@ public class TaskService : ITaskService
             ? (IReadOnlyList<TaskItem>)Array.Empty<TaskItem>()
             : await _repository.AddRangeAsync(toAdd, cancellationToken);
 
-        var skipped = incoming.Count - added.Count;
+        var skipped = rawList.Count - added.Count; // blanks + duplicates both count as skipped -> reconciles with request
         var all = existing.Concat(added).Select(ToDto).ToList();
         return new SyncResultDto(added.Count, skipped, all);
     }

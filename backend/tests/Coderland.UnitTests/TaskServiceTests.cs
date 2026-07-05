@@ -53,4 +53,46 @@ public class TaskServiceTests
         Assert.Equal(1, result.Skipped);
         Assert.Equal(2, result.Tasks.Count); // existing + newly imported
     }
+
+    [Fact]
+    public async Task SyncAsync_CollapsesIntraBatchDuplicates()
+    {
+        var repo = new Mock<ITaskRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<TaskItem>());
+        repo.Setup(r => r.AddRangeAsync(It.IsAny<IEnumerable<TaskItem>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IEnumerable<TaskItem> items, CancellationToken _) =>
+            {
+                var list = items.ToList();
+                for (var i = 0; i < list.Count; i++) list[i].Id = 100 + i;
+                return list;
+            });
+        var sut = new TaskService(repo.Object);
+
+        var result = await sut.SyncAsync(new[] { "Buy milk", "buy MILK" });
+
+        Assert.Equal(1, result.Imported);
+        Assert.Equal(1, result.Skipped);
+        Assert.Single(result.Tasks);
+    }
+
+    [Fact]
+    public async Task SyncAsync_CountsBlankEntriesAsSkipped()
+    {
+        var repo = new Mock<ITaskRepository>();
+        repo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new List<TaskItem>());
+        repo.Setup(r => r.AddRangeAsync(It.IsAny<IEnumerable<TaskItem>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IEnumerable<TaskItem> items, CancellationToken _) =>
+            {
+                var list = items.ToList();
+                for (var i = 0; i < list.Count; i++) list[i].Id = 200 + i;
+                return list;
+            });
+        var sut = new TaskService(repo.Object);
+
+        var result = await sut.SyncAsync(new[] { "  ", "Buy milk" });
+
+        Assert.Equal(1, result.Imported);
+        Assert.Equal(1, result.Skipped);
+        Assert.Single(result.Tasks);
+    }
 }
