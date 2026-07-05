@@ -17,13 +17,20 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<TaskItemDto>>> GetAll(CancellationToken cancellationToken) =>
         Ok(await _service.GetAllAsync(cancellationToken));
 
-    /// <summary>Creates a single task. Rejects an empty description.</summary>
+    /// <summary>Creates a single task. Rejects an empty or blank description.</summary>
     [HttpPost]
     public async Task<ActionResult<TaskItemDto>> Create([FromBody] CreateTaskRequest request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return ValidationProblem(ModelState);
-        var created = await _service.CreateAsync(request.Descripcion, cancellationToken);
-        return CreatedAtAction(nameof(GetAll), new { }, created);
+        try
+        {
+            var created = await _service.CreateAsync(request.Descripcion, cancellationToken);
+            return CreatedAtAction(nameof(GetAll), new { }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            ModelState.AddModelError(nameof(CreateTaskRequest.Descripcion), ex.Message);
+            return ValidationProblem(ModelState);
+        }
     }
 
     /// <summary>Bulk-syncs task descriptions from the mobile client (union by description).</summary>

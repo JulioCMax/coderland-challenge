@@ -30,4 +30,12 @@ public class TasksEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var post = await client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest(""));
         Assert.Equal(HttpStatusCode.BadRequest, post.StatusCode);
     }
+
+    [Fact]
+    public async Task Post_WhitespaceDescription_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+        var post = await client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest("   "));
+        Assert.Equal(HttpStatusCode.BadRequest, post.StatusCode);
+    }
 }
