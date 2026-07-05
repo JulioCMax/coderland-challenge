@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Coderland.Api\Coderland.Api.csproj" />
     <ProjectReference Include="..\..\src\Coderland.Application\Coderland.Application.csproj" />
     <ProjectReference Include="..\..\src\Coderland.Domain\Coderland.Domain.csproj" />
   </ItemGroup>
