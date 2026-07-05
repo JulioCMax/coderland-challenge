@@ -1,0 +1,19 @@
+using MarcasAutos.Application.Dtos;
+using MarcasAutos.Domain.Repositories;
+
+namespace MarcasAutos.Application.Services;
+
+public class MarcaAutoService : IMarcaAutoService
+{
+    private readonly IMarcaAutoRepository _repository;
+
+    public MarcaAutoService(IMarcaAutoRepository repository) => _repository = repository;
+
+    public async Task<IReadOnlyList<MarcaAutoDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var marcas = await _repository.GetAllAsync(cancellationToken);
+        return marcas
+            .Select(m => new MarcaAutoDto(m.Id, m.Nombre, m.PaisOrigen, m.FechaCreacion))
+            .ToList();
+    }
+}
