@@ -1,5 +1,7 @@
 using Coderland.Application.Services;
+using Coderland.Domain.External;
 using Coderland.Domain.Repositories;
+using Coderland.Infrastructure.External.Vpic;
 using Coderland.Infrastructure.Persistence;
 using Coderland.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,16 @@ builder.Services.AddScoped<IMarcaAutoRepository, MarcaAutoRepository>();
 builder.Services.AddScoped<IMarcaAutoService, MarcaAutoService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+
+// External read-through catalog (NHTSA vPIC) — typed client with standard resilience.
+builder.Services.AddHttpClient<IVehicleMakesProvider, VpicMakesProvider>(client =>
+{
+    client.BaseAddress = new Uri("https://vpic.nhtsa.dot.gov/api/vehicles/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+})
+.AddStandardResilienceHandler();
+
+builder.Services.AddScoped<ICatalogoExternoService, CatalogoExternoService>();
 
 // --- Web ---
 builder.Services.AddControllers();
