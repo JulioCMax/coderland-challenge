@@ -20,6 +20,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connect
 // --- Dependency inversion: ports -> adapters ---
 builder.Services.AddScoped<IMarcaAutoRepository, MarcaAutoRepository>();
 builder.Services.AddScoped<IMarcaAutoService, MarcaAutoService>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 // --- Web ---
 builder.Services.AddControllers();
