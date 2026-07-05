@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MarcasAutos.Application\MarcasAutos.Application.csproj" />
-    <ProjectReference Include="..\..\src\MarcasAutos.Domain\MarcasAutos.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Coderland.Application\Coderland.Application.csproj" />
+    <ProjectReference Include="..\..\src\Coderland.Domain\Coderland.Domain.csproj" />
   </ItemGroup>
 
 </Project>

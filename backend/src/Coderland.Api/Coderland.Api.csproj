@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MarcasAutos.Application\MarcasAutos.Application.csproj" />
-    <ProjectReference Include="..\MarcasAutos.Infrastructure\MarcasAutos.Infrastructure.csproj" />
+    <ProjectReference Include="..\Coderland.Application\Coderland.Application.csproj" />
+    <ProjectReference Include="..\Coderland.Infrastructure\Coderland.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

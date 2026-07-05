@@ -1,9 +1,9 @@
-using MarcasAutos.Application.Services;
-using MarcasAutos.Domain.Entities;
-using MarcasAutos.Domain.Repositories;
+using Coderland.Application.Services;
+using Coderland.Domain.Entities;
+using Coderland.Domain.Repositories;
 using Moq;
 
-namespace MarcasAutos.UnitTests;
+namespace Coderland.UnitTests;
 
 public class MarcaAutoServiceTests
 {

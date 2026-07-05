@@ -1,4 +1,4 @@
-namespace MarcasAutos.Domain.Entities;
+namespace Coderland.Domain.Entities;
 
 /// <summary>Car brand aggregate root persisted in the <c>MarcasAutos</c> table.</summary>
 public class MarcaAuto

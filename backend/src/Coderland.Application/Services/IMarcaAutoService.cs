@@ -1,6 +1,6 @@
-using MarcasAutos.Application.Dtos;
+using Coderland.Application.Dtos;
 
-namespace MarcasAutos.Application.Services;
+namespace Coderland.Application.Services;
 
 public interface IMarcaAutoService
 {

@@ -1,6 +1,6 @@
-using MarcasAutos.Domain.Entities;
+using Coderland.Domain.Entities;
 
-namespace MarcasAutos.Domain.Repositories;
+namespace Coderland.Domain.Repositories;
 
 /// <summary>Outbound port for reading and writing <see cref="MarcaAuto"/> aggregates.</summary>
 public interface IMarcaAutoRepository
