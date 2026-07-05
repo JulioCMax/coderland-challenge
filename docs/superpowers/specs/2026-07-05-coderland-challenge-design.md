@@ -76,7 +76,11 @@ Two distinct artifacts (do not conflate them):
 
 1. **`CONVENTIONS.md`** — the standards actually enforced by the code:
    - **Naming across boundaries** (the killer table):
-     `DB (pais_origen) -> C# (PaisOrigen) -> JSON (paisOrigen) -> TS (paisOrigen)`
+     `DB (PaisOrigen) -> C# (PaisOrigen) -> JSON (paisOrigen) -> TS (paisOrigen)`
+     The DB uses PascalCase to stay consistent with the PDF-mandated `MarcasAutos`
+     table name; an ADR records that snake_case is the PostgreSQL industry standard
+     (unquoted identifiers fold to lowercase, so `MarcasAutos` forces quoted
+     identifiers) and would be the greenfield choice.
    - Backend: PascalCase types/methods/properties, `I`-prefixed interfaces,
      `Async` suffix; DTOs explicit; ProblemDetails for errors.
    - Mobile/TS: camelCase vars, PascalCase components/types; Redux Toolkit slices.
@@ -108,6 +112,9 @@ tasks sync).
   `HasData` with 3 brands (Toyota, Ford, Volkswagen). Unique index on `Nombre`.
 - **`TaskItem`** (table `Tasks`, for the mobile sync bonus): `Id` (int, PK),
   `Descripcion` (required), `FechaCreacion` (UTC).
+- **Naming:** tables + columns in **PascalCase** to comply with the mandated
+  `MarcasAutos` name; an ADR documents the snake_case Postgres industry standard
+  and why we deviate here (explicit requirement).
 
 ### 6.4 API surface
 | Method | Route                | Purpose                                            |
@@ -210,11 +217,16 @@ tasks sync).
 - `origin` remote is configured but nothing is pushed yet; pushing is a separate,
   explicit step.
 
-## 11. Open Decisions (to resolve before/within implementation)
+## 11. Resolved Decisions
 
-- **Mobile tooling:** Expo (easier to run on Android, recommended) vs React
-  Native CLI. To be fixed in an ADR.
-- **DB column naming:** snake_case (Postgres-idiomatic, via naming convention)
-  vs EF default PascalCase. To be fixed in `CONVENTIONS.md` + ADR. Table name is
-  `MarcasAutos` per the PDF.
-- **redux-persist:** include for offline-across-restart, or keep Redux-only.
+- **Mobile tooling:** **Expo**. Easiest to run/test on Android (emulator or the
+  Expo Go app), Jest-friendly. Unit tests run in Node — **no device/emulator
+  required**. Optional installable APK via EAS Build for the evaluator. Mobile is
+  **not** cloud-deployed (the challenge runs it locally on Android); only the
+  backend gets a live URL.
+- **DB naming:** tables + columns **PascalCase**, complying with the mandated
+  `MarcasAutos` name. An ADR records that snake_case is the PostgreSQL industry
+  standard and the greenfield choice, and that we deviate only for the explicit
+  requirement.
+- **Redux:** **Redux Toolkit** (the modern, standard way to use Redux).
+- **redux-persist:** **included** (offline-across-restart, no backend dependency).
