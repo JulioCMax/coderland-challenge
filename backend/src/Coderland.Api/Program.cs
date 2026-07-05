@@ -5,6 +5,7 @@ using Coderland.Infrastructure.External.Vpic;
 using Coderland.Infrastructure.Persistence;
 using Coderland.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +26,15 @@ builder.Services.AddScoped<IMarcaAutoService, MarcaAutoService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 
+builder.Services.Configure<VpicOptions>(builder.Configuration.GetSection(VpicOptions.SectionName));
+
 // External read-through catalog (NHTSA vPIC) — typed client with standard resilience.
-builder.Services.AddHttpClient<IVehicleMakesProvider, VpicMakesProvider>(client =>
+// BaseAddress comes from bound VpicOptions (default in the class; override via config/env).
+// No HttpClient.Timeout here: the standard resilience handler owns the timeout budget.
+builder.Services.AddHttpClient<IVehicleMakesProvider, VpicMakesProvider>((sp, client) =>
 {
-    client.BaseAddress = new Uri("https://vpic.nhtsa.dot.gov/api/vehicles/");
-    client.Timeout = TimeSpan.FromSeconds(15);
+    var options = sp.GetRequiredService<IOptions<VpicOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl);
 })
 .AddStandardResilienceHandler();
 
