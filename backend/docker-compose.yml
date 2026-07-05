@@ -4,13 +4,13 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: marcasautos
+      POSTGRES_DB: coderland
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d marcasautos"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d coderland"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      ConnectionStrings__Default: "Host=db;Port=5432;Database=marcasautos;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}"
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=coderland;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}"
       ASPNETCORE_ENVIRONMENT: Development
     ports:
       - "127.0.0.1:8080:8080"
