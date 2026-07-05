@@ -43,10 +43,17 @@ builder.Services.AddScoped<ICatalogoExternoService, CatalogoExternoService>();
 // --- Web ---
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xml = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xml);
+    if (File.Exists(xmlPath)) options.IncludeXmlComments(xmlPath);
+});
 
 // --- Health checks (includes PostgreSQL connectivity) ---
-builder.Services.AddHealthChecks().AddNpgSql(connectionString, name: "postgres");
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "live" })
+    .AddNpgSql(connectionString, name: "postgres", tags: new[] { "ready" });
 
 var app = builder.Build();
 
@@ -67,6 +74,14 @@ app.UseSwaggerUI();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live")
+});
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 app.Run();
 
