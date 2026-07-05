@@ -4,7 +4,9 @@ using Coderland.Domain.Repositories;
 using Coderland.Infrastructure.External.Vpic;
 using Coderland.Infrastructure.Persistence;
 using Coderland.Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +44,7 @@ builder.Services.AddScoped<ICatalogoExternoService, CatalogoExternoService>();
 
 // --- Web ---
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -52,7 +55,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // --- Health checks (includes PostgreSQL connectivity) ---
 builder.Services.AddHealthChecks()
-    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "live" })
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" })
     .AddNpgSql(connectionString, name: "postgres", tags: new[] { "ready" });
 
 var app = builder.Build();
@@ -68,17 +71,19 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseExceptionHandler();
+
 // Swagger is enabled in all environments for the demo.
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
-app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+app.MapHealthChecks("/health/live", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("live")
 });
-app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready")
 });

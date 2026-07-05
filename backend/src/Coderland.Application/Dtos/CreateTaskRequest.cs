@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Coderland.Application.Dtos;
 
-/// <summary>Request body to create a task. Description must not be empty.</summary>
-public record CreateTaskRequest([Required, MinLength(1)] string Descripcion);
+/// <summary>Request body to create a task. A blank description is rejected by the service (returns 400).</summary>
+public record CreateTaskRequest(string Descripcion);

@@ -19,7 +19,7 @@ public class VpicMakesProvider : IVehicleMakesProvider
         var response = await _http.GetFromJsonAsync<VpicMakesResponse>(
             "GetMakesForVehicleType/car?format=json", cancellationToken);
 
-        return response?.Results
+        return response?.Results?
             .Select(r => new VehicleMake(r.MakeId, r.MakeName))
             .ToList() ?? new List<VehicleMake>();
     }
@@ -30,7 +30,7 @@ public class VpicMakesProvider : IVehicleMakesProvider
         var response = await _http.GetFromJsonAsync<VpicModelsResponse>(
             $"GetModelsForMake/{safeMake}?format=json", cancellationToken);
 
-        return response?.Results
+        return response?.Results?
             .Select(r => new VehicleModel(r.ModelId, r.ModelName, r.MakeName))
             .ToList() ?? new List<VehicleModel>();
     }

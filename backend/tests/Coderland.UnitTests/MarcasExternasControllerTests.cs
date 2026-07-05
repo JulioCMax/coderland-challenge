@@ -1,6 +1,8 @@
+using System.Net.Http;
 using Coderland.Api.Controllers;
 using Coderland.Application.Dtos;
 using Coderland.Application.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -36,5 +38,19 @@ public class MarcasExternasControllerTests
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var payload = Assert.IsAssignableFrom<IReadOnlyList<ModeloExternoDto>>(ok.Value);
         Assert.Single(payload);
+    }
+
+    [Fact]
+    public async Task GetMarcas_WhenExternalSourceFails_Returns502()
+    {
+        var service = new Mock<ICatalogoExternoService>();
+        service.Setup(s => s.GetMarcasExternasAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException("vPIC down"));
+        var sut = new MarcasExternasController(service.Object);
+
+        var result = await sut.GetMarcas(CancellationToken.None);
+
+        var obj = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(StatusCodes.Status502BadGateway, obj.StatusCode);
     }
 }

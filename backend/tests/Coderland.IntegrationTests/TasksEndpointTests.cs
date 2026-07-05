@@ -38,4 +38,17 @@ public class TasksEndpointTests : IClassFixture<CustomWebApplicationFactory>
         var post = await client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest("   "));
         Assert.Equal(HttpStatusCode.BadRequest, post.StatusCode);
     }
+
+    [Fact]
+    public async Task Sync_DedupsAndReturnsReconciledCounts()
+    {
+        var client = _factory.CreateClient();
+        var request = new SyncTasksRequest(new List<string> { "Sync-Alpha", "Sync-Beta", "sync-alpha" });
+        var response = await client.PostAsJsonAsync("/api/tasks/sync", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<SyncResultDto>();
+        Assert.NotNull(result);
+        Assert.Equal(2, result!.Imported);   // Sync-Alpha, Sync-Beta
+        Assert.Equal(1, result.Skipped);     // "sync-alpha" duplicates "Sync-Alpha" (case-insensitive)
+    }
 }

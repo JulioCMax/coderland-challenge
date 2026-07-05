@@ -25,6 +25,8 @@ public class VpicMakesProviderTests
         Assert.Equal(2, makes.Count);
         Assert.Equal(448, makes[0].Id);
         Assert.Equal("TOYOTA", makes[0].Nombre);
+        Assert.Equal(449, makes[1].Id);
+        Assert.Equal("HONDA", makes[1].Nombre);
     }
 
     [Fact]
