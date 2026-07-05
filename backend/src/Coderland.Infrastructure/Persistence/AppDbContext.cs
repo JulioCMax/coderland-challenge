@@ -9,6 +9,8 @@ public class AppDbContext : DbContext
 
     public DbSet<MarcaAuto> MarcasAutos => Set<MarcaAuto>();
 
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Apply all IEntityTypeConfiguration classes in this assembly.
