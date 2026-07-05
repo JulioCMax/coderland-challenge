@@ -7,7 +7,8 @@ public class MarcaAutoService : IMarcaAutoService
 {
     private readonly IMarcaAutoRepository _repository;
 
-    public MarcaAutoService(IMarcaAutoRepository repository) => _repository = repository;
+    public MarcaAutoService(IMarcaAutoRepository repository) =>
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
     public async Task<IReadOnlyList<MarcaAutoDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {

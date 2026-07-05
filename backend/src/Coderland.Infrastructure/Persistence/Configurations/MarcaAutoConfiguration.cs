@@ -6,6 +6,8 @@ namespace Coderland.Infrastructure.Persistence.Configurations;
 
 public class MarcaAutoConfiguration : IEntityTypeConfiguration<MarcaAuto>
 {
+    private const int MaxNameLength = 100;
+
     // Fixed timestamp so HasData produces a deterministic migration (no DateTime.UtcNow).
     private static readonly DateTime SeedDate = new(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -15,8 +17,8 @@ public class MarcaAutoConfiguration : IEntityTypeConfiguration<MarcaAuto>
         builder.ToTable("MarcasAutos");
         builder.HasKey(m => m.Id);
 
-        builder.Property(m => m.Nombre).IsRequired().HasMaxLength(100);
-        builder.Property(m => m.PaisOrigen).HasMaxLength(100);
+        builder.Property(m => m.Nombre).IsRequired().HasMaxLength(MaxNameLength);
+        builder.Property(m => m.PaisOrigen).HasMaxLength(MaxNameLength);
         builder.Property(m => m.FechaCreacion).IsRequired();
 
         builder.HasIndex(m => m.Nombre).IsUnique();

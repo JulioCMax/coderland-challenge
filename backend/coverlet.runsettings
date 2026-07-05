@@ -13,7 +13,7 @@
               (e.g. the ASP.NET Core OpenAPI source generator's interceptor shims),
               not code the team writes or can meaningfully unit test.
           -->
-          <ExcludeByFile>**/Migrations/*.cs,**/obj/**/*.cs</ExcludeByFile>
+          <ExcludeByFile>**/Coderland.Infrastructure/Migrations/*.cs,**/obj/**/*.cs</ExcludeByFile>
         </Configuration>
       </DataCollector>
     </DataCollectors>

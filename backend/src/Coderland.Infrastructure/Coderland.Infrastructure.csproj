@@ -7,6 +7,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+    <!--
+      Npgsql.EntityFrameworkCore.PostgreSQL 10.0.2 depends on
+      Microsoft.EntityFrameworkCore.Relational [10.0.4, 11.0.0), which resolves
+      transitively to 10.0.4 and conflicts (MSB3277) with the 10.0.9 line pulled
+      in by Microsoft.EntityFrameworkCore.Design/InMemory elsewhere in the
+      solution. Pin Relational explicitly to the higher, unified 10.0.9 until
+      Npgsql ships a release that targets it directly.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
   </ItemGroup>
 
   <PropertyGroup>

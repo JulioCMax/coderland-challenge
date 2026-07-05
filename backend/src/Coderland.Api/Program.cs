@@ -7,8 +7,14 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Persistence ---
-var connectionString = builder.Configuration.GetConnectionString("Default")
-    ?? "Host=localhost;Port=5432;Database=marcasautos;Username=postgres;Password=postgres";
+// appsettings.json (and the ConnectionStrings__Default env var in containers) is the
+// single source of truth for this value; fail fast rather than silently falling back
+// to a hardcoded credential if it's ever missing.
+var connectionString = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'Default' is not configured.");
+}
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 // --- Dependency inversion: ports -> adapters ---
