@@ -35,7 +35,10 @@
   "jest": {
     "preset": "jest-expo",
     "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
-    "collectCoverageFrom": ["src/**/*.{ts,tsx}", "!src/**/*.d.ts"]
+    "collectCoverageFrom": ["src/**/*.{ts,tsx}", "!src/**/*.d.ts"],
+    "moduleNameMapper": {
+      "^immer$": "<rootDir>/node_modules/immer/dist/cjs/index.js"
+    }
   },
   "private": true
 }
