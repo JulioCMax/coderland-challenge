@@ -38,8 +38,11 @@ integrate with the deployed backend without altering any required behavior.
   no longer earns its place (Swagger still documents the API).
 - **No CQRS / MediatR / event sourcing / AutoMapper.** Ceremony without value at
   this scope.
-- **External vPIC import is OPTIONAL and isolated** — never runs automatically,
-  nothing depends on it.
+- **No marcas CRUD, no import-to-DB, no `Modelo` table.** External brands/models
+  are **read-through** (live from vPIC, never persisted). Marcas are read-only;
+  DB writes are shown via the Tasks resource.
+- **External vPIC reads are OPTIONAL and isolated** — separate endpoints, nothing
+  depends on them, models fetched on-demand per brand.
 - **Mobile <-> backend integration is additive and opt-in.** The mobile app is
   fully functional offline; backend-powered features self-announce and degrade
   gracefully.
@@ -103,8 +106,9 @@ outbound HTTP), Docker Compose. Deploy: GCP Cloud Run + Supabase (PostgreSQL).
 ### 6.2 Architecture — 4 layers (Clean-lite / Ports & Adapters)
 `Api -> Application -> Domain`, `Infrastructure -> Domain`. `Domain` references
 nobody; the dependency rule is enforced by project references. The Application
-layer is justified by real orchestration (vPIC import; CRUD validation/dedup;
-tasks sync).
+layer is justified by real orchestration (external catalog read-through with
+resilience + mapping; tasks sync). Leaner than a CRUD-heavy design, but it still
+carries its own responsibility.
 
 ### 6.3 Data model
 - **`MarcaAuto`** (table `MarcasAutos`): `Id` (int, PK identity), `Nombre`
@@ -115,25 +119,28 @@ tasks sync).
 - **Naming:** tables + columns in **PascalCase** to comply with the mandated
   `MarcasAutos` name; an ADR documents the snake_case Postgres industry standard
   and why we deviate here (explicit requirement).
+- **No `Modelo` entity.** External brands/models are read-through only (never
+  persisted). Persisted tables are `MarcasAutos` and `Tasks` only.
 
 ### 6.4 API surface
-| Method | Route                | Purpose                                            |
-|--------|----------------------|----------------------------------------------------|
-| GET    | `/api/marcas`        | List all brands (**PDF-required endpoint**)        |
-| GET    | `/api/marcas/{id}`   | Get one (404 if missing)                           |
-| POST   | `/api/marcas`        | Create (validate required + unique `Nombre`)       |
-| PUT    | `/api/marcas/{id}`   | Update                                             |
-| DELETE | `/api/marcas/{id}`   | Hard delete (404 if missing)                       |
-| POST   | `/api/marcas/import` | **Optional** import from NHTSA vPIC (dedup)        |
-| GET    | `/api/tasks`         | List tasks (pull for mobile sync)                  |
-| POST   | `/api/tasks`         | Create a task                                      |
-| POST   | `/api/tasks/sync`    | Bulk upsert from mobile (union by description)      |
-| GET    | `/health`            | Health check incl. PostgreSQL connectivity         |
-| GET    | `/swagger`           | OpenAPI docs (enabled in prod for the demo)        |
+| Method | Route                                  | Purpose                                          |
+|--------|----------------------------------------|--------------------------------------------------|
+| GET    | `/api/marcas`                          | List brands from the DB seed (**PDF-required**)  |
+| GET    | `/api/marcas/externas`                 | Live brands from NHTSA vPIC (read-through)        |
+| GET    | `/api/marcas/externas/{marca}/modelos` | Live models for one brand, on-demand              |
+| GET    | `/api/tasks`                           | List tasks (pull for mobile sync)                 |
+| POST   | `/api/tasks`                           | Create a task                                     |
+| POST   | `/api/tasks/sync`                      | Bulk upsert from mobile (union by description)     |
+| GET    | `/health`                              | Health check incl. PostgreSQL connectivity        |
+| GET    | `/swagger`                             | OpenAPI docs (enabled in prod for the demo)       |
 
 - DTOs explicit + manual mapping. Validation via DataAnnotations + model state.
-- vPIC import documented in Swagger as "optional demonstration: import from a
-  free public API"; isolated behind `IVehicleMakesProvider` + Polly.
+- External brand/model reads are **read-through** (live, never persisted),
+  isolated behind `IVehicleMakesProvider` + Polly, and documented in Swagger as an
+  optional demonstration of consuming a free public API. Models are fetched
+  **on-demand per brand** to avoid an eager fan-out.
+- DB writes are demonstrated via the **Tasks** resource (mobile sync); marcas are
+  read-only.
 
 ### 6.5 Docker & deploy
 - `docker-compose.yml`: `db` (postgres:16-alpine, volume, healthcheck) + `api`
@@ -191,12 +198,14 @@ tasks sync).
 
 1. **Backend core (gate):** DbContext -> PostgreSQL, migration + seed,
    `GET /api/marcas`, XUnit at 70%, `docker-compose`.
-2. **Backend polish:** full CRUD + validation + OpenAPI + health check.
-3. **Mobile core (gate):** Home + Tareas (Redux, modal, empty-validation,
+2. **Backend polish:** OpenAPI + health check + Tasks resource
+   (`GET/POST /api/tasks`, `POST /api/tasks/sync`).
+3. **External catalog (bonus):** `GET /api/marcas/externas` +
+   `.../{marca}/modelos` (read-through vPIC, on-demand, no persistence).
+4. **Mobile core (gate):** Home + Tareas (Redux, modal, empty-validation,
    navigation persistence) + Listado (mockapi, loading, fetch-on-mount) + tests.
-4. **Integration bonus:** Marcas screen (backend), self-announcing + graceful.
-5. **Persistence bonus:** redux-persist and/or tasks Sync (backend `/api/tasks`).
-6. **Optional:** vPIC import.
+5. **Integration bonus:** Marcas screen (reads backend), self-announcing + graceful.
+6. **Persistence bonus:** redux-persist and/or tasks Sync (backend `/api/tasks`).
 7. **Cross-cutting:** deploy + `README.md` + `CONVENTIONS.md` + ADRs + CI.
 
 > Discipline: bonuses never delay or endanger the two cores. Each tier ships a
