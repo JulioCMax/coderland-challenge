@@ -2,3 +2,13 @@
 **/obj/
 **/.vs/
 **/*.user
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+**/appsettings.*.Local.json
+**/secrets*.json
+**/*.pfx
+**/*.key
+**/.user-secrets/
