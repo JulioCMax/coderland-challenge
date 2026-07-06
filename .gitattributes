@@ -1,0 +1,2 @@
+# Shell scripts must stay LF so they run on macOS/Linux (a CRLF `#!/usr/bin/env bash` fails).
+*.sh text eol=lf
