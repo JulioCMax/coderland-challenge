@@ -34,7 +34,7 @@ export default function TareasScreen() {
         renderItem={({ item }) => <Text style={styles.item}>{item.description}</Text>}
         ListEmptyComponent={<Text style={styles.empty}>No hay tasks todavía.</Text>}
       />
-      <Button title="Sincronizar" onPress={handleSync} disabled={syncing} />
+      <Button title="Sincronizar" onPress={handleSync} disabled={syncing || tasks.length === 0} />
       {status ? <Text style={styles.status}>{status}</Text> : null}
       <AddTaskModal visible={modalVisible} onClose={() => setModalVisible(false)} />
     </View>

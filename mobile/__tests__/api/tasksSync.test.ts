@@ -23,4 +23,11 @@ describe('syncTasks', () => {
       .mockResolvedValue({ ok: false, status: 500, json: async () => ({}) } as unknown as Response);
     await expect(syncTasks(['A'])).rejects.toThrow('500');
   });
+
+  it('throws when the backend responds with an unexpected body shape', async () => {
+    jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue({ ok: true, json: async () => ({}) } as unknown as Response);
+    await expect(syncTasks(['A'])).rejects.toThrow('shape');
+  });
 });

@@ -21,5 +21,9 @@ export async function syncTasks(descriptions: string[]): Promise<SyncResult> {
   if (!response.ok) {
     throw new Error(`Sync failed: ${response.status}`);
   }
-  return (await response.json()) as SyncResult;
+  const result = (await response.json()) as SyncResult;
+  if (typeof result.imported !== 'number' || typeof result.skipped !== 'number' || !Array.isArray(result.tasks)) {
+    throw new Error('Unexpected sync response shape');
+  }
+  return result;
 }
