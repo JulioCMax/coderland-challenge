@@ -30,6 +30,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: ['tasks'],
+  timeout: 0,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
