@@ -16,6 +16,9 @@ export default function HomeScreen({ navigation }: Props) {
       <View style={styles.button}>
         <Button title="Listado" onPress={() => navigation.navigate('Listado')} />
       </View>
+      <View style={styles.button}>
+        <Button title="Marcas (backend)" onPress={() => navigation.navigate('Marcas')} />
+      </View>
     </View>
   );
 }

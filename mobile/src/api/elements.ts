@@ -7,5 +7,9 @@ export async function fetchElements(): Promise<Element[]> {
   if (!response.ok) {
     throw new Error(`Failed to fetch elements: ${response.status}`);
   }
-  return (await response.json()) as Element[];
+  const data = (await response.json()) as Element[];
+  if (!Array.isArray(data)) {
+    throw new Error('Unexpected elements response shape');
+  }
+  return data;
 }

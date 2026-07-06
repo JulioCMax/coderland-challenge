@@ -25,4 +25,10 @@ describe('HomeScreen', () => {
     fireEvent.press(screen.getByText('Listado'));
     expect(navigation.navigate).toHaveBeenCalledWith('Listado');
   });
+
+  it('navigates to Marcas when its button is pressed', async () => {
+    const { navigation } = await renderHome();
+    fireEvent.press(screen.getByText('Marcas (backend)'));
+    expect(navigation.navigate).toHaveBeenCalledWith('Marcas');
+  });
 });

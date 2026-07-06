@@ -4,6 +4,10 @@ import { flushListTimers, renderWithProviders } from '../../test-utils';
 import TareasScreen from '../../src/screens/TareasScreen';
 import { setupStore } from '../../src/store';
 import { addTask } from '../../src/store/tasksSlice';
+import { syncTasks } from '../../src/api/tasksSync';
+
+jest.mock('../../src/api/tasksSync');
+const mockedSyncTasks = syncTasks as jest.MockedFunction<typeof syncTasks>;
 
 describe('TareasScreen', () => {
   it('shows the empty state when there are no tasks', async () => {
@@ -65,6 +69,33 @@ describe('TareasScreen', () => {
 
     await renderWithProviders(<TareasScreen />, { store });
     expect(await screen.findByText('Persisted')).toBeTruthy();
+    await flushListTimers();
+  });
+});
+
+describe('TareasScreen — sync (bonus)', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it('syncs the current task descriptions to the backend', async () => {
+    mockedSyncTasks.mockResolvedValue({ imported: 1, skipped: 0, tasks: [] });
+    const store = setupStore();
+    store.dispatch(addTask('Sync me'));
+    await renderWithProviders(<TareasScreen />, { store });
+
+    await fireEvent.press(screen.getByText('Sincronizar'));
+    expect(mockedSyncTasks).toHaveBeenCalledWith(['Sync me']);
+    expect(await screen.findByText('Sincronizado: 1 nuevas, 0 ya existían.')).toBeTruthy();
+    await flushListTimers();
+  });
+
+  it('shows a graceful message when sync fails', async () => {
+    mockedSyncTasks.mockRejectedValue(new Error('offline'));
+    const store = setupStore();
+    store.dispatch(addTask('Sync me'));
+    await renderWithProviders(<TareasScreen />, { store });
+
+    await fireEvent.press(screen.getByText('Sincronizar'));
+    expect(await screen.findByText('No se pudo sincronizar. El backend no está disponible.')).toBeTruthy();
     await flushListTimers();
   });
 });
