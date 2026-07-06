@@ -19,6 +19,18 @@ Each side has its own README with the details:
 - Backend: run it with the script below; API docs live at `/swagger`.
 - Mobile: see [mobile/README.md](mobile/README.md).
 
+## Live backend (deployed)
+
+The backend is deployed on **Google Cloud Run** (region `us-east4`), backed by **Supabase** (managed PostgreSQL):
+
+**https://coderland-api-53839117724.us-east4.run.app**
+
+- API docs: [`/swagger`](https://coderland-api-53839117724.us-east4.run.app/swagger)
+- Seeded car brands: [`/api/marcas`](https://coderland-api-53839117724.us-east4.run.app/api/marcas)
+- Health: [`/health/ready`](https://coderland-api-53839117724.us-east4.run.app/health/ready)
+
+The service scales to zero, so the first request after an idle period has a brief cold start. Migrations and seed data are applied automatically on startup. The mobile app can talk to this instance by setting `EXPO_PUBLIC_BACKEND_URL` to the URL above.
+
 ## Run the backend (Docker)
 
 Requires Docker Desktop running.
