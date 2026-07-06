@@ -97,4 +97,6 @@ npm run typecheck
 
 ## Design
 
-Architecture and decisions are documented under [docs/](docs/) — the master design spec and the per-plan implementation notes.
+- **[CONVENTIONS.md](CONVENTIONS.md)** — naming across boundaries, language policy, API/testing/commit conventions.
+- **[Architecture Decision Records](docs/adr/README.md)** — the key design decisions and their trade-offs.
+- **[docs/](docs/)** — the master design spec and per-plan implementation notes.
