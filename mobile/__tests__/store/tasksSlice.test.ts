@@ -1,4 +1,4 @@
-import reducer, { addTask, selectTasks } from '../../src/store/tasksSlice';
+import reducer, { addTask, mergeServerTasks, selectTasks } from '../../src/store/tasksSlice';
 import { setupStore } from '../../src/store';
 
 describe('tasksSlice', () => {
@@ -29,5 +29,28 @@ describe('tasksSlice', () => {
     store.dispatch(addTask('First'));
     store.dispatch(addTask('Second'));
     expect(selectTasks(store.getState()).map((t) => t.description)).toEqual(['First', 'Second']);
+  });
+
+  describe('mergeServerTasks', () => {
+    it('adds backend descriptions that are not already present', () => {
+      const store = setupStore();
+      store.dispatch(addTask('Local'));
+      store.dispatch(mergeServerTasks(['Local', 'From backend']));
+      expect(selectTasks(store.getState()).map((t) => t.description)).toEqual(['Local', 'From backend']);
+    });
+
+    it('dedupes case-insensitively so an existing task is not duplicated', () => {
+      const store = setupStore();
+      store.dispatch(addTask('Buy milk'));
+      store.dispatch(mergeServerTasks(['buy milk']));
+      expect(selectTasks(store.getState())).toHaveLength(1);
+    });
+
+    it('ignores blank descriptions and trims the rest', () => {
+      const store = setupStore();
+      store.dispatch(mergeServerTasks(['  ', '  Trim me  ']));
+      const tasks = selectTasks(store.getState());
+      expect(tasks.map((t) => t.description)).toEqual(['Trim me']);
+    });
   });
 });

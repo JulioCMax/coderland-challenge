@@ -1,34 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { fetchMarcas } from '../api/marcas';
-import type { Marca } from '../types/marca';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/types';
+import { fetchModelos } from '../api/catalogoExterno';
+import type { Modelo } from '../types/catalogoExterno';
 import Screen from '../components/ui/Screen';
+import AppButton from '../components/ui/AppButton';
 import Skeleton from '../components/ui/Skeleton';
 import { colors, radii, shadows, spacing, typography } from '../theme';
 
-const SKELETON_ROWS = [0, 1, 2];
+type Props = NativeStackScreenProps<RootStackParamList, 'Modelos'>;
 
-function LoadingRow() {
-  return (
-    <View style={styles.row}>
-      <Skeleton width="40%" height={16} />
-      <Skeleton width={64} height={12} />
-    </View>
-  );
-}
+const SKELETON_ROWS = [0, 1, 2, 3, 4];
 
-export default function MarcasScreen() {
-  const [marcas, setMarcas] = useState<Marca[]>([]);
+export default function ModelosScreen({ route }: Props) {
+  const { marca } = route.params;
+  const [modelos, setModelos] = useState<Modelo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let active = true;
     setLoading(true);
     setError(false);
-    fetchMarcas()
+    fetchModelos(marca)
       .then((data) => {
-        if (active) setMarcas(data);
+        if (active) setModelos(data);
       })
       .catch(() => {
         if (active) setError(true);
@@ -39,40 +36,47 @@ export default function MarcasScreen() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [marca]);
+
+  useEffect(() => load(), [load]);
 
   return (
     <Screen contentStyle={styles.content}>
       <View style={styles.badge}>
         <View style={styles.badgeDot} />
-        <Text style={styles.badgeText}>Catálogo servido por el backend</Text>
+        <Text style={styles.badgeText}>Modelos de {marca}</Text>
       </View>
 
       {loading ? (
         <View style={styles.list}>
           <Text style={[typography.caption, styles.loadingLabel]}>Cargando...</Text>
           {SKELETON_ROWS.map((key) => (
-            <LoadingRow key={key} />
+            <View key={key} style={styles.row}>
+              <Skeleton width="60%" height={14} />
+            </View>
           ))}
         </View>
       ) : error ? (
         <View style={styles.center}>
-          <Text style={[typography.subtitle, styles.errorTitle]}>
-            No se pudo conectar con el backend. Probá de nuevo más tarde.
-          </Text>
-          <Text style={[typography.caption, styles.errorHint]}>La app sigue funcionando sin esta sección.</Text>
+          <Text style={[typography.subtitle, styles.errorTitle]}>No se pudieron cargar los modelos.</Text>
+          <Text style={[typography.caption, styles.errorHint]}>El backend o la fuente externa (vPIC) no respondieron.</Text>
+          <AppButton label="Reintentar" variant="secondary" onPress={load} style={styles.retry} />
         </View>
       ) : (
         <FlatList
-          data={marcas}
-          keyExtractor={(marca) => String(marca.id)}
+          data={modelos}
+          keyExtractor={(modelo) => String(modelo.id)}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <View style={styles.row}>
               <Text style={typography.subtitle}>{item.nombre}</Text>
-              {item.paisOrigen ? <Text style={styles.country}>{item.paisOrigen}</Text> : null}
             </View>
           )}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={[typography.caption, styles.errorHint]}>{marca} no reporta modelos en vPIC.</Text>
+            </View>
+          }
         />
       )}
     </Screen>
@@ -80,7 +84,7 @@ export default function MarcasScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingVertical: spacing.lg, gap: spacing.lg },
+  content: { paddingVertical: spacing.lg, gap: spacing.md },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -95,11 +99,8 @@ const styles = StyleSheet.create({
   badgeText: { ...typography.caption, color: colors.primaryDark, fontWeight: '700' },
   list: { gap: spacing.md },
   loadingLabel: { marginBottom: spacing.xs },
-  listContent: { gap: spacing.md, paddingBottom: spacing.xl },
+  listContent: { flexGrow: 1, gap: spacing.md, paddingBottom: spacing.xl },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
     borderWidth: StyleSheet.hairlineWidth,
@@ -108,8 +109,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     ...shadows.sm,
   },
-  country: { ...typography.caption, color: colors.textMuted },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg },
   errorTitle: { textAlign: 'center' },
   errorHint: { textAlign: 'center' },
+  retry: { marginTop: spacing.md, alignSelf: 'center', paddingHorizontal: spacing.xxxl },
 });

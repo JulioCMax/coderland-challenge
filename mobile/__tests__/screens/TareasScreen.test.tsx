@@ -84,7 +84,27 @@ describe('TareasScreen — sync (bonus)', () => {
 
     await fireEvent.press(screen.getByText('Sincronizar'));
     expect(mockedSyncTasks).toHaveBeenCalledWith(['Sync me']);
-    expect(await screen.findByText('Sincronizado: 1 nuevas, 0 ya existían.')).toBeTruthy();
+    expect(await screen.findByText('Sincronizado: 1 enviadas, 0 traídas del backend.')).toBeTruthy();
+    await flushListTimers();
+  });
+
+  it('pulls tasks created on the backend into the local list', async () => {
+    mockedSyncTasks.mockResolvedValue({
+      imported: 1,
+      skipped: 0,
+      tasks: [
+        { id: 1, descripcion: 'Sync me', fechaCreacion: '2026-01-01T00:00:00Z' },
+        { id: 2, descripcion: 'Created on backend', fechaCreacion: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    const store = setupStore();
+    store.dispatch(addTask('Sync me'));
+    await renderWithProviders(<TareasScreen />, { store });
+
+    await fireEvent.press(screen.getByText('Sincronizar'));
+    // The backend-only task shows up; the one already local is not duplicated:
+    expect(await screen.findByText('Created on backend')).toBeTruthy();
+    expect(store.getState().tasks.items.map((t) => t.description)).toEqual(['Sync me', 'Created on backend']);
     await flushListTimers();
   });
 

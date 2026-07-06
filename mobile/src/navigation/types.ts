@@ -3,4 +3,7 @@ export type RootStackParamList = {
   Tareas: undefined;
   Listado: undefined;
   Marcas: undefined;
+  Info: undefined;
+  Catalogo: undefined;
+  Modelos: { marca: string };
 };
