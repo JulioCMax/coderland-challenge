@@ -37,7 +37,8 @@
     "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
     "collectCoverageFrom": ["src/**/*.{ts,tsx}", "!src/**/*.d.ts"],
     "moduleNameMapper": {
-      "^immer$": "<rootDir>/node_modules/immer/dist/cjs/index.js"
+      "^immer$": "<rootDir>/node_modules/immer/dist/cjs/index.js",
+      "^react-redux$": "<rootDir>/node_modules/react-redux/dist/cjs/index.js"
     }
   },
   "private": true
