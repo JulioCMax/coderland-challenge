@@ -6,5 +6,9 @@ export async function fetchMarcas(): Promise<Marca[]> {
   if (!response.ok) {
     throw new Error(`Failed to fetch marcas: ${response.status}`);
   }
-  return (await response.json()) as Marca[];
+  const data = (await response.json()) as Marca[];
+  if (!Array.isArray(data)) {
+    throw new Error('Unexpected marcas response shape');
+  }
+  return data;
 }

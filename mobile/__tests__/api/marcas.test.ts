@@ -25,4 +25,11 @@ describe('fetchMarcas', () => {
       .mockResolvedValue({ ok: false, status: 502, json: async () => ({}) } as unknown as Response);
     await expect(fetchMarcas()).rejects.toThrow('502');
   });
+
+  it('throws when the response body is a 200 but not an array', async () => {
+    jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue({ ok: true, json: async () => ({ not: 'an array' }) } as unknown as Response);
+    await expect(fetchMarcas()).rejects.toThrow('shape');
+  });
 });
