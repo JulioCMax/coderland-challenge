@@ -1,5 +1,5 @@
 import React, { type PropsWithChildren, type ReactElement } from 'react';
-import { render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
 import { setupStore, type AppStore, type RootState } from './src/store';
 
@@ -17,4 +17,12 @@ export async function renderWithProviders(
     return <Provider store={store}>{children}</Provider>;
   }
   return { store, ...(await render(ui, { wrapper: Wrapper })) };
+}
+
+// Flushes VirtualizedList's deferred setState (a real ~50ms setTimeout) inside act(),
+// so FlatList updates don't leak past the test as "not wrapped in act(...)" warnings.
+export async function flushListTimers() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 60));
+  });
 }
