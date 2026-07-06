@@ -7,7 +7,7 @@ describe('fetchElements', () => {
 
   it('requests the exact mandated mockapi URL', async () => {
     const fetchMock = jest
-      .spyOn(global, 'fetch')
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValue({ ok: true, json: async () => [] } as unknown as Response);
     await fetchElements();
     expect(fetchMock).toHaveBeenCalledWith('https://6172cfe5110a740017222e2b.mockapi.io/elements');
@@ -17,14 +17,14 @@ describe('fetchElements', () => {
   it('returns the parsed array on success', async () => {
     const data = [{ id: '1', name: 'Pauline Blanda', avatar: 'https://x/a.jpg', createdAt: '2021-10-22' }];
     jest
-      .spyOn(global, 'fetch')
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValue({ ok: true, json: async () => data } as unknown as Response);
     await expect(fetchElements()).resolves.toEqual(data);
   });
 
   it('throws when the response is not ok', async () => {
     jest
-      .spyOn(global, 'fetch')
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValue({ ok: false, status: 500, json: async () => ({}) } as unknown as Response);
     await expect(fetchElements()).rejects.toThrow('500');
   });
