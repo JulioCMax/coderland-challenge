@@ -48,9 +48,24 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    var xml = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xml);
-    if (File.Exists(xmlPath)) options.IncludeXmlComments(xmlPath);
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    {
+        Title = "Coderland API",
+        Version = "v1",
+        Description = "Backend for the Coderland mobile challenge. Exposes two areas: a car-brand catalog " +
+            "(local, seeded data plus a read-through proxy to the external NHTSA vPIC service) and a simple " +
+            "task list consumed by the mobile client, including a bulk sync endpoint that unions tasks by " +
+            "description."
+    });
+
+    // Api assembly XML comments (controllers, action summaries/remarks).
+    var apiXml = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXml);
+    if (File.Exists(apiXmlPath)) options.IncludeXmlComments(apiXmlPath);
+
+    // Application assembly XML comments (DTO/schema documentation).
+    var applicationXmlPath = Path.Combine(AppContext.BaseDirectory, "Coderland.Application.xml");
+    if (File.Exists(applicationXmlPath)) options.IncludeXmlComments(applicationXmlPath);
 });
 
 // --- Health checks (includes PostgreSQL connectivity) ---
