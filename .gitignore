@@ -58,3 +58,6 @@ desktop.ini
 # ---------- Docker ----------
 # Keep compose + Dockerfile tracked; ignore local overrides
 docker-compose.override.yml
+
+# ---------- Local tooling ----------
+.atl/
