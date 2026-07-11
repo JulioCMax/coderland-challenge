@@ -12,9 +12,6 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://coderland-api-53839117724.us-east4.run.app"
       }
     },
     "production": {
